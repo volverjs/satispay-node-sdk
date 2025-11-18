@@ -1,24 +1,25 @@
 {
     "compilerOptions": {
         "target": "ES2020",
-        "module": "nodenext",
+        "module": "ESNext",
         "lib": [
             "ES2020"
         ],
-        "declaration": true,
-        "declarationMap": true,
         "outDir": "./dist",
-        "rootDir": ".",
         "strict": true,
         "esModuleInterop": true,
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
-        "moduleResolution": "nodenext",
+        "moduleResolution": "Bundler",
         "resolveJsonModule": true,
         "noUnusedLocals": true,
         "noUnusedParameters": true,
         "noImplicitReturns": true,
-        "noFallthroughCasesInSwitch": true
+        "noFallthroughCasesInSwitch": true,
+        "types": ["node", "vitest/globals"],
+        "paths": {
+            "~/*": ["./src/*"]
+        }
     },
     "include": [
         "src/**/*",
@@ -27,6 +28,7 @@
     "exclude": [
         "node_modules",
         "dist",
-        "examples"
+        "examples",
+        "tests"
     ]
 }

@@ -8,12 +8,28 @@
     "bin": {
         "satispay-keygen": "./dist/src/bin/satispay-keygen.js"
     },
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js"
+        },
+        "./package.json": "./package.json"
+    },
+    "files": [
+        "dist",
+        "README.md",
+        "LICENSE",
+        "CHANGELOG.md"
+    ],
+    "sideEffects": false,
     "scripts": {
-        "build": "tsc",
-        "build:watch": "tsc --watch",
+        "dev": "vite build --watch",
+        "build": "vite build",
         "prepublishOnly": "npm run build",
-        "test": "jest",
-        "test:watch": "jest --watch",
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "test:ui": "vitest --ui",
+        "test:coverage": "vitest run --coverage",
         "lint": "eslint src",
         "lint:fix": "eslint src --fix",
         "format": "prettier --write \"src/**/*.ts\""
@@ -44,9 +60,15 @@
     "devDependencies": {
         "@eslint/js": "^9.17.0",
         "@types/node": "^22.10.2",
+        "@vitest/ui": "^2.1.8",
+        "@vitest/coverage-v8": "^2.1.8",
         "eslint": "^9.17.0",
+        "eslint-plugin-vitest": "^0.5.4",
         "prettier": "^3.4.2",
         "typescript": "^5.7.2",
-        "typescript-eslint": "^8.19.1"
+        "typescript-eslint": "^8.19.1",
+        "vite": "^6.0.3",
+        "vite-plugin-dts": "^4.3.0",
+        "vitest": "^2.1.8"
     }
 }

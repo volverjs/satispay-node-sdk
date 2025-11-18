@@ -28,5 +28,14 @@ export { PreAuthorizedPaymentToken } from './PreAuthorizedPaymentToken.js'
 export { Request } from './Request.js'
 export { RSAServiceFactory } from './RSAService/RSAServiceFactory.js'
 
+// Export utilities
+export {
+	Amount,
+	DateUtils,
+	Validation,
+	CodeGenerator,
+	PaymentStatusUtils,
+} from './utils.js'
+
 // Export types
 export * from './types.js'

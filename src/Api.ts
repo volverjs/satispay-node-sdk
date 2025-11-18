@@ -5,6 +5,34 @@ import { ApiAuthentication } from './ApiAuthentication.js'
 
 /**
  * Main API class for Satispay GBusiness SDK
+ * 
+ * This class manages global configuration for the SDK including:
+ * - Environment (staging/production)
+ * - Authentication keys (public key, private key, key ID)
+ * - Custom platform headers
+ * 
+ * All configuration is static and applies to all API calls.
+ * 
+ * @example
+ * ```typescript
+ * import { Api, Payment } from '@volverjs/satispay-node-sdk'
+ * 
+ * // Option 1: Authenticate with activation token
+ * const auth = await Api.authenticateWithToken('your-token-from-dashboard')
+ * console.log(`Key ID: ${auth.keyId}`)
+ * 
+ * // Option 2: Use existing keys
+ * Api.setEnv('production')
+ * Api.setKeyId('your-key-id')
+ * Api.setPrivateKey('-----BEGIN PRIVATE KEY-----\\n...')
+ * Api.setPublicKey('-----BEGIN PUBLIC KEY-----\\n...')
+ * 
+ * // Set platform identification (optional)
+ * Api.setPlatformHeader('MyPlatform/1.0.0')
+ * 
+ * // Now you can use the API
+ * const payment = await Payment.create({ ... })
+ * ```
  */
 export class Api {
   private static env: Environment = 'production'

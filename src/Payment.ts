@@ -3,14 +3,76 @@ import { PaymentResponse, PaymentCreateBody, PaymentQueryParams, PaymentUpdateBo
 
 /**
  * Payment class for managing Satispay payments
+ * 
+ * This class provides methods to create, retrieve, list, and update payments
+ * using the Satispay GBusiness API.
+ * 
+ * @example
+ * ```typescript
+ * import { Payment, Amount } from '@volverjs/satispay-node-sdk'
+ * 
+ * // Create a payment
+ * const payment = await Payment.create({
+ *   flow: 'MATCH_CODE',
+ *   amount_unit: Amount.toCents(10.50), // 1050 cents
+ *   currency: 'EUR',
+ *   external_code: 'ORDER-123',
+ *   metadata: {
+ *     description: 'Test payment',
+ *   },
+ * })
+ * 
+ * // Get payment details
+ * const details = await Payment.get(payment.id)
+ * 
+ * // List payments with filters
+ * const payments = await Payment.list({
+ *   starting_date: new Date('2024-01-01'),
+ *   limit: 10,
+ * })
+ * 
+ * // Update payment metadata
+ * const updated = await Payment.update(payment.id, {
+ *   metadata: {
+ *     order_status: 'completed',
+ *   },
+ * })
+ * ```
  */
 export class Payment {
   private static readonly apiPath = '/g_business/v1/payments'
 
   /**
-   * Create a payment
-   * @param body Payment data
-   * @param headers Custom headers (optional)
+   * Create a new payment
+   * 
+   * Creates a payment request that can be accepted by the user.
+   * The payment flow determines how the user will approve the payment:
+   * - `MATCH_CODE`: User enters a 6-digit code shown on your interface
+   * - `MATCH_USER`: User is matched by phone number (requires phone_number field)
+   * - `REFUND`: Creates a refund payment (negative amount)
+   * 
+   * @param body Payment data including amount, currency, flow, and optional metadata
+   * @param headers Custom headers to include in the request (optional)
+   * @returns Created payment object with ID, status, and code_identifier
+   * 
+   * @throws {Error} If the request fails or validation errors occur
+   * 
+   * @example
+   * ```typescript
+   * // Create a MATCH_CODE payment
+   * const payment = await Payment.create({
+   *   flow: 'MATCH_CODE',
+   *   amount_unit: 1000, // 10.00 EUR in cents
+   *   currency: 'EUR',
+   *   external_code: 'ORDER-123',
+   *   metadata: {
+   *     description: 'Pizza Margherita',
+   *     customer_email: 'customer@example.com',
+   *   },
+   * })
+   * 
+   * console.log(`Payment code: ${payment.code_identifier}`)
+   * ```
    */
   static async create(
     body: PaymentCreateBody,

@@ -1,6 +1,9 @@
 # (Unofficial) Satispay GBusiness Node.js API SDK
 
 [![npm version](https://img.shields.io/npm/v/@volverjs/satispay-node-sdk.svg)](https://www.npmjs.com/package/@volverjs/satispay-node-sdk)
+[![npm downloads](https://img.shields.io/npm/dm/@volverjs/satispay-node-sdk.svg)](https://www.npmjs.com/package/@volverjs/satispay-node-sdk)
+[![CI](https://github.com/volverjs/satispay-node-sdk/actions/workflows/ci.yml/badge.svg)](https://github.com/volverjs/satispay-node-sdk/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/volverjs/satispay-node-sdk/branch/main/graph/badge.svg)](https://codecov.io/gh/volverjs/satispay-node-sdk)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue.svg)](https://www.typescriptlang.org/)
 [![Zero Dependencies](https://img.shields.io/badge/dependencies-0-green.svg)](https://www.npmjs.com/package/@volverjs/satispay-node-sdk)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -50,28 +53,48 @@ bun add @volverjs/satispay-node-sdk
 
 ### Authentication
 
-1. Generate an activation token from your [Satispay Business Dashboard](https://business.satispay.com)
-2. Authenticate and generate RSA keys:
+Get your credentials using the CLI tool with an activation token:
+
+```bash
+npx @volverjs/satispay-node-sdk YOUR_ACTIVATION_TOKEN
+```
+
+This will generate:
+- **Public Key** - RSA public key
+- **Private Key** - RSA private key (keep this secure!)
+- **Key ID** - Your authentication key ID
+
+**Where to get the activation token:**
+- **Production**: [Satispay Business Dashboard](https://business.satispay.com) → Developers → Generate Activation Code
+- **Sandbox**: Request from [Satispay Developer Support](https://developers.satispay.com/docs/credentials#sandbox-account)
+
+**Options:**
+```bash
+npx @volverjs/satispay-node-sdk YOUR_TOKEN              # Sandbox (default)
+npx @volverjs/satispay-node-sdk YOUR_TOKEN --production # Production
+npx @volverjs/satispay-node-sdk YOUR_TOKEN --sandbox    # Sandbox (explicit)
+```
+
+> **⚠️ Important**: The activation token is single-use. Save the generated credentials securely!
+
+### Configure the SDK
+
+Use the generated credentials to configure the SDK:
 
 ```typescript
 import { Api } from '@volverjs/satispay-node-sdk';
 
-Api.setSandbox(true);
-
-const authentication = await Api.authenticateWithToken('YOUR_ACTIVATION_TOKEN');
-
-// Store these securely
-const publicKey = authentication.publicKey;
-const privateKey = authentication.privateKey;
-const keyId = authentication.keyId;
+Api.setSandbox(true); // or false for production
+Api.setPublicKey(process.env.SATISPAY_PUBLIC_KEY!);
+Api.setPrivateKey(process.env.SATISPAY_PRIVATE_KEY!);
+Api.setKeyId(process.env.SATISPAY_KEY_ID!);
 ```
 
-3. Configure the SDK with your keys:
-
-```typescript
-Api.setPublicKey(publicKey);
-Api.setPrivateKey(privateKey);
-Api.setKeyId(keyId);
+Store credentials in `.env`:
+```bash
+SATISPAY_PUBLIC_KEY="-----BEGIN PUBLIC KEY-----\n..."
+SATISPAY_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n..."
+SATISPAY_KEY_ID="your-key-id"
 ```
 
 ### Create a Payment
@@ -317,19 +340,49 @@ SATISPAY_KEY_ID="your-key-id"
 
 ```bash
 # Install dependencies
-npm install
+pnpm install
 
 # Build
-npm run build
+pnpm build
 
 # Watch mode
-npm run build:watch
+pnpm build:watch
+
+# Run tests
+pnpm test
+
+# Watch tests
+pnpm test:watch
+
+# Test with UI
+pnpm test:ui
+
+# Coverage report
+pnpm test:coverage
 
 # Lint
-npm run lint
+pnpm lint
 
 # Format
-npm run format
+pnpm format
+```
+
+## Testing
+
+This project uses [Vitest](https://vitest.dev/) for testing. The test suite includes:
+
+- **Unit tests** for all core modules (Api, Payment, Consumer, DailyClosure, etc.)
+- **RSA Service tests** for cryptographic operations
+- **Mock-based tests** for API interactions
+
+Current test coverage: **79.45%**
+
+Run tests:
+```bash
+pnpm test              # Run all tests
+pnpm test:watch        # Watch mode for development
+pnpm test:ui           # Interactive UI
+pnpm test:coverage     # Generate coverage report
 ```
 
 ## Examples
