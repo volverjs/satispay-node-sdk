@@ -1,0 +1,30 @@
+# Source files
+src/
+examples/
+*.ts
+!*.d.ts
+
+# Config files
+tsconfig.json
+.eslintrc.js
+.prettierrc
+
+# Development
+node_modules/
+.vscode/
+.idea/
+
+# Tests
+coverage/
+.nyc_output/
+
+# Misc
+*.log
+.DS_Store
+.env
+
+# PHP files (legacy)
+*.php
+composer.json
+composer.lock
+vendor/

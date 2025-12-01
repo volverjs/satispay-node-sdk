@@ -1,0 +1,5 @@
+examples/authentication.json
+node_modules
+dist
+coverage
+*.local
