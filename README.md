@@ -1,8 +1,6 @@
 # (Unofficial) Satispay GBusiness Node.js API SDK
 
 [![npm version](https://img.shields.io/npm/v/@volverjs/satispay-node-sdk.svg)](https://www.npmjs.com/package/@volverjs/satispay-node-sdk)
-[![npm downloads](https://img.shields.io/npm/dm/@volverjs/satispay-node-sdk.svg)](https://www.npmjs.com/package/@volverjs/satispay-node-sdk)
-[![CI](https://github.com/volverjs/satispay-node-sdk/actions/workflows/ci.yml/badge.svg)](https://github.com/volverjs/satispay-node-sdk/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/volverjs/satispay-node-sdk/branch/main/graph/badge.svg)](https://codecov.io/gh/volverjs/satispay-node-sdk)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue.svg)](https://www.typescriptlang.org/)
 [![Zero Dependencies](https://img.shields.io/badge/dependencies-0-green.svg)](https://www.npmjs.com/package/@volverjs/satispay-node-sdk)
