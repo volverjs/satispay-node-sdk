@@ -9,7 +9,7 @@ global.fetch = mockFetch as any
 describe('Request', () => {
 	beforeEach(() => {
 		vi.clearAllMocks()
-		Api.setEnv('test')
+		Api.setEnv('staging')
 		Api.setPrivateKey(
 			'-----BEGIN PRIVATE KEY-----\ntest\n-----END PRIVATE KEY-----'
 		)
@@ -185,10 +185,49 @@ describe('Request', () => {
 			await expect(Request.get('/test/path')).rejects.toThrow()
 		})
 
+		it('should throw error with request id when available', async () => {
+			mockFetch.mockResolvedValue({
+				ok: false,
+				status: 400,
+				text: async () =>
+					JSON.stringify({
+						message: 'Bad request',
+						code: 'BAD_REQUEST',
+						wlt: 'req-123',
+					}),
+				headers: new Headers(),
+			})
+
+			await expect(Request.get('/test/path')).rejects.toThrow(
+				'Bad request, request id: req-123'
+			)
+		})
+
+		it('should throw generic error when error details not available', async () => {
+			mockFetch.mockResolvedValue({
+				ok: false,
+				status: 500,
+				text: async () => 'Internal Server Error',
+				headers: new Headers(),
+			})
+
+			await expect(Request.get('/test/path')).rejects.toThrow(
+				'HTTP status is not 2xx: 500'
+			)
+		})
+
 		it('should throw error on network failure', async () => {
 			mockFetch.mockRejectedValue(new Error('Network error'))
 
 			await expect(Request.get('/test/path')).rejects.toThrow('Network error')
+		})
+
+		it('should handle non-Error thrown values', async () => {
+			mockFetch.mockRejectedValue('string error')
+
+			await expect(Request.get('/test/path')).rejects.toThrow(
+				'Request failed: string error'
+			)
 		})
 
 		it('should handle non-JSON responses', async () => {
