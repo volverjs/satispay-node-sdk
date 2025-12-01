@@ -1,6 +1,6 @@
 {
     "name": "@volverjs/satispay-node-sdk",
-    "version": "0.0.1",
+    "version": "0.0.0",
     "packageManager": "pnpm@10.24.0",
     "description": "(Unofficial) Satispay GBusiness Node.js API SDK",
     "type": "module",
