@@ -28,12 +28,13 @@ async function main() {
             limit: 10,
             // status: 'ACCEPTED', // Optional: filter by status
             // from_date: '2024-01-01', // Optional: filter by date
+            // starting_after_timestamp: new Date('2024-01-01'), // Optional: filter by timestamp using Date object
         });
 
-        console.log(`Found ${result.list.length} payments`);
+        console.log(`Found ${result.data.length} payments`);
         console.log('Has more:', result.has_more);
         console.log('\nPayments:');
-        result.list.forEach((payment, index) => {
+        result.data.forEach((payment, index) => {
             console.log(`\n${index + 1}. Payment ${payment.id}`);
             console.log(`   Status: ${payment.status}`);
             console.log(`   Amount: ${payment.amount_unit / 100} ${payment.currency}`);

@@ -191,11 +191,11 @@ export class Request {
         fetchOptions.body = body
       }
 
-      // Disable SSL verification in test mode (Node.js only)
+      // Disable SSL verification in staging mode (Node.js only)
       // Note: Deno and Bun don't support this directly via fetch
-      if (Api.getEnv() === 'test' && typeof process !== 'undefined' && process.versions?.node) {
+      if (Api.getEnv() === 'staging' && typeof process !== 'undefined' && process.versions?.node) {
         // For Node.js 18+ with fetch, we need to use a custom agent
-        // This is a workaround for test environments only
+        // This is a workaround for staging/test environments only
         const https = await import('https')
         const agent = new https.Agent({
           rejectUnauthorized: false,

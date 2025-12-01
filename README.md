@@ -18,6 +18,9 @@ Universal (but unofficial) TypeScript SDK for Satispay GBusiness API integration
 - **Type-safe** - Complete TypeScript definitions
 - **Modern** - Fetch API, async/await, ES Modules
 - **Secure** - Native RSA-SHA256 encryption
+- **Developer-friendly** - Intuitive API with automatic conversions:
+  - 💶 Use `amount` (euros) instead of `amount_unit` (cents)
+  - 📅 Use `Date` objects instead of timestamp strings
 
 ## Installation
 
@@ -102,7 +105,15 @@ SATISPAY_KEY_ID="your-key-id"
 ```typescript
 import { Payment } from '@volverjs/satispay-node-sdk';
 
+// Using amount in euros (recommended)
 const payment = await Payment.create({
+  flow: 'MATCH_CODE',
+  amount: 1.99, // Amount in euros (automatically converted to cents)
+  currency: 'EUR',
+});
+
+// Or using amount_unit in cents (still supported)
+const payment2 = await Payment.create({
   flow: 'MATCH_CODE',
   amount_unit: 199, // Amount in cents (1.99 EUR)
   currency: 'EUR',
@@ -119,15 +130,30 @@ console.log('Code:', payment.code_identifier);
 #### Create Payment
 
 ```typescript
+// Using amount in euros (recommended)
 const payment = await Payment.create({
   flow: 'MATCH_CODE',
-  amount_unit: 100,
+  amount: 1.00, // Automatically converted to 100 cents
+  currency: 'EUR',
+  callback_url: 'https://your-site.com/callback',
+  external_code: 'ORDER-123',
+  metadata: { order_id: '12345' },
+});
+
+// Or using amount_unit in cents (still supported)
+const payment2 = await Payment.create({
+  flow: 'MATCH_CODE',
+  amount_unit: 100, // Amount in cents
   currency: 'EUR',
   callback_url: 'https://your-site.com/callback',
   external_code: 'ORDER-123',
   metadata: { order_id: '12345' },
 });
 ```
+
+**💡 Tip**: Use `amount` (euros) for more intuitive code. The SDK automatically converts it to cents.
+
+See [examples/create-payment-with-amount.ts](./examples/create-payment-with-amount.ts) for more examples.
 
 #### Get Payment
 
@@ -145,16 +171,48 @@ const result = await Payment.all({
   from_date: '2024-01-01',
 });
 
-result.list.forEach(payment => {
+result.data.forEach(payment => {
   console.log(`${payment.id}: ${payment.status}`);
 });
 ```
 
+##### Filter by Date
+
+You can filter payments using `Date` objects or timestamp strings:
+
+```typescript
+// Using Date objects (recommended)
+const yesterday = new Date();
+yesterday.setDate(yesterday.getDate() - 1);
+
+const recentPayments = await Payment.all({
+  starting_after_timestamp: yesterday, // Date is automatically converted to milliseconds
+  limit: 10,
+});
+
+// Or using timestamp string (milliseconds)
+const timestampString = new Date('2024-01-01').getTime().toString();
+const paymentsFromDate = await Payment.all({
+  starting_after_timestamp: timestampString,
+  limit: 10,
+});
+```
+
+See [examples/payment-date-filtering.ts](./examples/payment-date-filtering.ts) for more examples.
+
 #### Update Payment
 
 ```typescript
+// Using amount in euros
 const payment = await Payment.update('PAYMENT_ID', {
-  metadata: { order_id: '67890' },
+  action: 'ACCEPT',
+  amount: 5.50, // Automatically converted to 550 cents
+});
+
+// Or using amount_unit in cents
+const payment2 = await Payment.update('PAYMENT_ID', {
+  action: 'ACCEPT',
+  amount_unit: 550,
 });
 ```
 
@@ -202,6 +260,117 @@ const updatedToken = await PreAuthorizedPaymentToken.update(token.id, {
   status: 'CANCELED',
 });
 ```
+
+### Reports
+
+> **⚠️ Special Authentication Required**: Report APIs require special authentication keys. Contact tech@satispay.com to enable access.
+
+```typescript
+import { Report } from '@volverjs/satispay-node-sdk';
+
+// Create a new report
+const report = await Report.create({
+  type: 'PAYMENT_FEE',
+  format: 'CSV', // or 'PDF', 'XLSX'
+  from_date: '2025-11-01',
+  to_date: '2025-11-30',
+  columns: ['transaction_id', 'transaction_date', 'total_amount'], // Optional
+});
+
+// Get list of reports
+const reports = await Report.all({
+  limit: 10,
+  starting_after: 'report-123',
+});
+
+// Get specific report
+const reportDetails = await Report.get('report-123');
+
+if (reportDetails.status === 'READY' && reportDetails.download_url) {
+  console.log('Download URL:', reportDetails.download_url);
+}
+```
+
+**Important Notes:**
+- Reports are extracted at merchant level (includes all shops)
+- Reports for the previous day should be generated at least 4 hours after midnight
+- Report status: `PENDING`, `READY`, or `FAILED`
+
+### Sessions (POS Integration)
+
+Sessions are used for POS/device integration to manage fund lock payments incrementally:
+
+```typescript
+import { Session } from '@volverjs/satispay-node-sdk';
+
+// Open a session from a fund lock
+const session = await Session.open({
+  fund_lock_id: 'payment-fund-lock-123',
+});
+
+console.log('Session ID:', session.id);
+console.log('Available amount:', session.residual_amount_unit);
+
+// Add items to the session
+await Session.createEvent(session.id, {
+  type: 'ADD_ITEM',
+  amount_unit: 500,
+  description: 'Coffee',
+  metadata: { sku: 'COFFEE-001' },
+});
+
+// Remove items
+await Session.createEvent(session.id, {
+  type: 'REMOVE_ITEM',
+  amount_unit: 200,
+  description: 'Discount',
+});
+
+// Update total
+await Session.createEvent(session.id, {
+  type: 'UPDATE_TOTAL',
+  amount_unit: 300,
+});
+
+// Get session details
+const details = await Session.get(session.id);
+console.log('Residual amount:', details.residual_amount_unit);
+
+// Close the session
+const closedSession = await Session.update(session.id, {
+  status: 'CLOSE',
+});
+```
+
+### Meal Voucher & Fringe Benefits
+
+Meal Voucher and Fringe Benefits payments use the same `Payment` API with additional parameters:
+
+```typescript
+import { Payment } from '@volverjs/satispay-node-sdk';
+
+// Create payment with Meal Voucher limits
+const payment = await Payment.create({
+  flow: 'MATCH_CODE',
+  amount: 50.00,
+  currency: 'EUR',
+  meal_voucher_max_amount_unit: 4000, // Max 40 EUR with meal vouchers
+  meal_voucher_max_quantity: 8, // Max 8 vouchers
+});
+
+// Update payment with Meal Voucher limits
+const updated = await Payment.update(payment.id, {
+  action: 'ACCEPT',
+  meal_voucher_max_amount_unit: 3000,
+  meal_voucher_max_quantity: 6,
+});
+```
+
+**Important Notes:**
+- Meal Vouchers and Fringe Benefits are mutually exclusive
+- Meal Voucher refunds: Only on the same day, full amount only
+- Fringe Benefits refunds: Only within the same month, full amount only
+- Default limit: 8 meal vouchers per payment if not specified
 
 ## Runtime-Specific Examples
 

@@ -30,16 +30,24 @@ async function main() {
 
         console.log('Creating payment...');
 
-        // Create a payment
+        // Create a payment using amount in euros (recommended)
         const payment = await Payment.create({
             flow: 'MATCH_CODE',
-            amount_unit: 199, // Amount in cents (1.99 EUR)
+            amount: 1.99, // Amount in euros (automatically converted to cents)
             currency: 'EUR',
         });
+
+        // Or using amount_unit in cents (still supported)
+        // const payment = await Payment.create({
+        //     flow: 'MATCH_CODE',
+        //     amount_unit: 199, // Amount in cents (1.99 EUR)
+        //     currency: 'EUR',
+        // });
 
         console.log('Payment created successfully!');
         console.log('Payment ID:', payment.id);
         console.log('Payment Code:', payment.code_identifier);
+        console.log('Amount:', payment.amount_unit / 100, 'EUR');
         console.log('Status:', payment.status);
         console.log('\nFull payment object:');
         console.log(JSON.stringify(payment, null, 2));

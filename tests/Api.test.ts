@@ -14,7 +14,7 @@ describe('Api', () => {
 		})
 
 		it('should set and get environment correctly', () => {
-			const environments: Environment[] = ['production', 'staging', 'test']
+			const environments: Environment[] = ['production', 'staging']
 
 			environments.forEach((env) => {
 				Api.setEnv(env)
@@ -88,6 +88,45 @@ describe('Api', () => {
 			expect(version).toBeTruthy()
 			expect(typeof version).toBe('string')
 			expect(version).toMatch(/^\d+\.\d+\.\d+$/)
+		})
+	})
+
+	describe('sandbox management', () => {
+		it('should check if sandbox is enabled', () => {
+			Api.setEnv('staging')
+			expect(Api.getSandbox()).toBe(true)
+
+			Api.setEnv('production')
+			expect(Api.getSandbox()).toBe(false)
+		})
+
+		it('should enable sandbox', () => {
+			Api.setSandbox(true)
+			expect(Api.getEnv()).toBe('staging')
+			expect(Api.getSandbox()).toBe(true)
+		})
+
+		it('should disable sandbox', () => {
+			Api.setSandbox(false)
+			expect(Api.getEnv()).toBe('production')
+			expect(Api.getSandbox()).toBe(false)
+		})
+
+		it('should enable sandbox by default', () => {
+			Api.setSandbox()
+			expect(Api.getEnv()).toBe('staging')
+		})
+	})
+
+	describe('getAuthservicesUrl', () => {
+		it('should return production URL', () => {
+			Api.setEnv('production')
+			expect(Api.getAuthservicesUrl()).toBe('https://authservices.satispay.com')
+		})
+
+		it('should return staging URL', () => {
+			Api.setEnv('staging')
+			expect(Api.getAuthservicesUrl()).toBe('https://staging.authservices.satispay.com')
 		})
 	})
 })

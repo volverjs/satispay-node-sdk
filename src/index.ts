@@ -25,6 +25,8 @@ export { Payment } from './Payment.js'
 export { Consumer } from './Consumer.js'
 export { DailyClosure } from './DailyClosure.js'
 export { PreAuthorizedPaymentToken } from './PreAuthorizedPaymentToken.js'
+export { Report } from './Report.js'
+export { Session } from './Session.js'
 export { Request } from './Request.js'
 export { RSAServiceFactory } from './RSAService/RSAServiceFactory.js'
 

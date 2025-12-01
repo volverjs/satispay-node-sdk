@@ -63,6 +63,49 @@ describe('Payment', () => {
 			expect(result).toEqual(mockPaymentResponse)
 		})
 
+		it('should create a payment using amount in euros', async () => {
+			const mockBody: PaymentCreateBody = {
+				flow: 'MATCH_CODE',
+				amount: 10.50, // 10.50 euros
+				currency: 'EUR',
+			}
+
+			vi.mocked(Request.post).mockResolvedValue(mockPaymentResponse)
+
+			const result = await Payment.create(mockBody)
+
+			expect(Request.post).toHaveBeenCalledWith('/g_business/v1/payments', {
+				headers: {},
+				body: {
+					flow: 'MATCH_CODE',
+					amount_unit: 1050, // Converted to cents
+					currency: 'EUR',
+				},
+				sign: true,
+			})
+			expect(result).toEqual(mockPaymentResponse)
+		})
+
+		it('should handle decimal amounts correctly', async () => {
+			const mockBody: PaymentCreateBody = {
+				flow: 'MATCH_CODE',
+				amount: 99.99,
+				currency: 'EUR',
+			}
+
+			vi.mocked(Request.post).mockResolvedValue(mockPaymentResponse)
+
+			await Payment.create(mockBody)
+
+			expect(Request.post).toHaveBeenCalledWith('/g_business/v1/payments', 
+				expect.objectContaining({
+					body: expect.objectContaining({
+						amount_unit: 9999,
+					}),
+				})
+			)
+		})
+
 		it('should create a payment with custom headers', async () => {
 			const mockBody: PaymentCreateBody = {
 				flow: 'MATCH_CODE',
@@ -180,6 +223,43 @@ describe('Payment', () => {
 				sign: true,
 			})
 		})
+
+		it('should convert Date object to timestamp in milliseconds', async () => {
+			const testDate = new Date('2024-01-15T10:30:00.000Z')
+			const expectedTimestamp = testDate.getTime().toString()
+			
+			vi.mocked(Request.get).mockResolvedValue(mockListResponse)
+
+			await Payment.all({
+				starting_after_timestamp: testDate,
+				limit: 5,
+			})
+
+			expect(Request.get).toHaveBeenCalledWith(
+				`/g_business/v1/payments?starting_after_timestamp=${expectedTimestamp}&limit=5`,
+				expect.objectContaining({
+					sign: true,
+				})
+			)
+		})
+
+		it('should accept timestamp as string without conversion', async () => {
+			const timestampString = '1705315800000'
+			
+			vi.mocked(Request.get).mockResolvedValue(mockListResponse)
+
+			await Payment.all({
+				starting_after_timestamp: timestampString,
+				limit: 5,
+			})
+
+			expect(Request.get).toHaveBeenCalledWith(
+				`/g_business/v1/payments?starting_after_timestamp=${timestampString}&limit=5`,
+				expect.objectContaining({
+					sign: true,
+				})
+			)
+		})
 	})
 
 	describe('update', () => {
@@ -200,7 +280,7 @@ describe('Payment', () => {
 			expect(result).toEqual(mockPaymentResponse)
 		})
 
-		it('should update a payment with amount', async () => {
+		it('should update a payment with amount_unit', async () => {
 			const paymentId = 'payment-123'
 			const updateBody = {
 				action: 'ACCEPT' as const,
@@ -215,6 +295,48 @@ describe('Payment', () => {
 				expect.objectContaining({
 					body: updateBody,
 					sign: true,
+				})
+			)
+		})
+
+		it('should update a payment with amount in euros', async () => {
+			const paymentId = 'payment-123'
+			const updateBody = {
+				action: 'ACCEPT' as const,
+				amount: 7.50, // 7.50 euros
+			}
+			vi.mocked(Request.put).mockResolvedValue(mockPaymentResponse)
+
+			await Payment.update(paymentId, updateBody)
+
+			expect(Request.put).toHaveBeenCalledWith(
+				'/g_business/v1/payments/payment-123',
+				expect.objectContaining({
+					body: {
+						action: 'ACCEPT',
+						amount_unit: 750, // Converted to cents
+					},
+					sign: true,
+				})
+			)
+		})
+
+		it('should handle decimal amounts in update', async () => {
+			const paymentId = 'payment-123'
+			const updateBody = {
+				action: 'ACCEPT' as const,
+				amount: 12.99,
+			}
+			vi.mocked(Request.put).mockResolvedValue(mockPaymentResponse)
+
+			await Payment.update(paymentId, updateBody)
+
+			expect(Request.put).toHaveBeenCalledWith(
+				'/g_business/v1/payments/payment-123',
+				expect.objectContaining({
+					body: expect.objectContaining({
+						amount_unit: 1299,
+					}),
 				})
 			)
 		})

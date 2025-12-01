@@ -1,0 +1,49 @@
+name: Run library test
+
+on:
+    workflow_call:
+
+jobs:
+    vitest:
+        timeout-minutes: 60
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 20
+
+            - uses: pnpm/action-setup@v4
+
+            - name: Use Node.js ${{ matrix.node-version }}
+              uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ matrix.node-version }}
+                  cache: 'pnpm'
+
+            - name: Install dependencies
+              run: pnpm install --no-frozen-lockfile
+              
+            - name: Test
+              run: pnpm test
+              env:
+                SATISPAY_PUBLIC_KEY: ${{ secrets.SATISPAY_PUBLIC_KEY }}
+                SATISPAY_PRIVATE_KEY: ${{ secrets.SATISPAY_PRIVATE_KEY }}
+                SATISPAY_KEY_ID: ${{ secrets.SATISPAY_KEY_ID }}
+
+            - name: Test Coverage
+              run: pnpm test:coverage
+              env:
+                SATISPAY_PUBLIC_KEY: ${{ secrets.SATISPAY_PUBLIC_KEY }}
+                SATISPAY_PRIVATE_KEY: ${{ secrets.SATISPAY_PRIVATE_KEY }}
+                SATISPAY_KEY_ID: ${{ secrets.SATISPAY_KEY_ID }}
+
+            - name: Upload coverage to Codecov
+              uses: codecov/codecov-action@v4
+              if: matrix.os == 'ubuntu-latest' && matrix.node-version == '20.x'
+              with:
+                token: ${{ secrets.CODECOV_TOKEN }}
+                files: ./coverage/coverage-final.json
+                flags: unittests
+                name: codecov-umbrella

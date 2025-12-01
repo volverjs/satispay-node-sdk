@@ -59,16 +59,23 @@ export class Payment {
    * 
    * @example
    * ```typescript
-   * // Create a MATCH_CODE payment
+   * // Create a payment using amount in euros (recommended)
    * const payment = await Payment.create({
    *   flow: 'MATCH_CODE',
-   *   amount_unit: 1000, // 10.00 EUR in cents
+   *   amount: 10.50, // 10.50 EUR (automatically converted to cents)
    *   currency: 'EUR',
    *   external_code: 'ORDER-123',
    *   metadata: {
    *     description: 'Pizza Margherita',
    *     customer_email: 'customer@example.com',
    *   },
+   * })
+   * 
+   * // Or using amount_unit in cents
+   * const payment2 = await Payment.create({
+   *   flow: 'MATCH_CODE',
+   *   amount_unit: 1050, // 10.50 EUR in cents
+   *   currency: 'EUR',
    * })
    * 
    * console.log(`Payment code: ${payment.code_identifier}`)
@@ -78,9 +85,16 @@ export class Payment {
     body: PaymentCreateBody,
     headers: Record<string, string> = {}
   ): Promise<PaymentResponse> {
+    // Convert amount (euros) to amount_unit (cents) if provided
+    const processedBody: any = { ...body }
+    if ('amount' in body && body.amount !== undefined) {
+      processedBody.amount_unit = Math.round(body.amount * 100)
+      delete processedBody.amount
+    }
+
     return Request.post<PaymentResponse>(this.apiPath, {
       headers,
-      body,
+      body: processedBody,
       sign: true,
     })
   }
@@ -99,17 +113,53 @@ export class Payment {
 
   /**
    * Get the payments list
+   * 
    * @param query Query parameters (optional)
    * @param headers Custom headers (optional)
+   * 
+   * @example
+   * ```typescript
+   * // List all payments
+   * const payments = await Payment.all({ limit: 20 })
+   * 
+   * // Filter by date using Date object (recommended)
+   * const yesterday = new Date()
+   * yesterday.setDate(yesterday.getDate() - 1)
+   * const filtered = await Payment.all({
+   *   starting_after_timestamp: yesterday,
+   *   limit: 10
+   * })
+   * 
+   * // Or using timestamp string in milliseconds
+   * const filteredByString = await Payment.all({
+   *   starting_after_timestamp: yesterday.getTime().toString(),
+   *   limit: 10
+   * })
+   * 
+   * // Pagination using payment ID
+   * const nextPage = await Payment.all({
+   *   starting_after: 'last-payment-id',
+   *   limit: 20
+   * })
+   * ```
+   * 
+   * @note The `starting_after_timestamp` parameter accepts both Date objects and timestamp strings in milliseconds.
+   *       Date objects are automatically converted to milliseconds timestamp.
    */
   static async all(
     query: PaymentQueryParams = {},
     headers: Record<string, string> = {}
-  ): Promise<{ list: PaymentResponse[]; has_more: boolean }> {
+  ): Promise<{ data: PaymentResponse[]; has_more: boolean }> {
     let path = this.apiPath
 
     if (Object.keys(query).length > 0) {
-      const queryString = new URLSearchParams(query as unknown as Record<string, string>).toString()
+      // Convert Date object to timestamp string if necessary
+      const processedQuery = { ...query }
+      if (processedQuery.starting_after_timestamp instanceof Date) {
+        processedQuery.starting_after_timestamp = processedQuery.starting_after_timestamp.getTime().toString()
+      }
+
+      const queryString = new URLSearchParams(processedQuery as unknown as Record<string, string>).toString()
       path += `?${queryString}`
     }
 
@@ -121,18 +171,41 @@ export class Payment {
 
   /**
    * Update a payment
+   * 
    * @param id Payment ID
-   * @param body Update data
+   * @param body Update data (action and optionally amount or amount_unit)
    * @param headers Custom headers (optional)
+   * 
+   * @example
+   * ```typescript
+   * // Update using amount in euros
+   * const updated = await Payment.update('payment-id', {
+   *   action: 'ACCEPT',
+   *   amount: 5.50, // Automatically converted to 550 cents
+   * })
+   * 
+   * // Or using amount_unit in cents
+   * const updated2 = await Payment.update('payment-id', {
+   *   action: 'ACCEPT',
+   *   amount_unit: 550,
+   * })
+   * ```
    */
   static async update(
     id: string,
     body: Partial<PaymentUpdateBody>,
     headers: Record<string, string> = {}
   ): Promise<PaymentResponse> {
+    // Convert amount (euros) to amount_unit (cents) if provided
+    const processedBody: any = { ...body }
+    if ('amount' in body && body.amount !== undefined) {
+      processedBody.amount_unit = Math.round(body.amount * 100)
+      delete processedBody.amount
+    }
+
     return Request.put<PaymentResponse>(`${this.apiPath}/${id}`, {
       headers,
-      body,
+      body: processedBody,
       sign: true,
     })
   }

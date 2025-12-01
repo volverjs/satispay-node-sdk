@@ -23,7 +23,7 @@ export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 /**
  * Environment
  */
-export type Environment = 'production' | 'staging' | 'test'
+export type Environment = 'production' | 'staging'
 
 /**
  * Payment status
@@ -41,6 +41,31 @@ export type PaymentFlow =
   | 'FUND_LOCK'
   | 'PRE_AUTHORIZED_FUND_LOCK'
   | 'HOTP_AUTH'
+
+/**
+ * Report type
+ */
+export type ReportType = 'PAYMENT_FEE'
+
+/**
+ * Report format type
+ */
+export type ReportFormatType = 'CSV' | 'PDF' | 'XLSX'
+
+/**
+ * Report status
+ */
+export type ReportStatus = 'PENDING' | 'READY' | 'FAILED'
+
+/**
+ * Session status
+ */
+export type SessionStatus = 'OPEN' | 'CLOSE'
+
+/**
+ * Session event type
+ */
+export type SessionEventType = 'ADD_ITEM' | 'REMOVE_ITEM' | 'UPDATE_TOTAL'
 
 /**
  * Payment action
@@ -65,10 +90,14 @@ export type PreAuthorizedTokenStatus = 'PENDING' | 'ACCEPTED' | 'CANCELED'
 
 /**
  * Payment creation body
+ * 
+ * @property amount - Amount in euros (e.g., 10.50). Will be automatically converted to amount_unit.
+ * @property amount_unit - Amount in cents (e.g., 1050). Use either 'amount' or 'amount_unit', not both.
+ * @property meal_voucher_max_amount_unit - Maximum amount in cents that can be paid with meal vouchers
+ * @property meal_voucher_max_quantity - Maximum number of meal vouchers that can be used
  */
 export type PaymentCreateBody = {
   flow: PaymentFlow
-  amount_unit: number
   currency: string
   callback_url?: string
   external_code?: string
@@ -77,7 +106,12 @@ export type PaymentCreateBody = {
   consumer_uid?: string
   required_success_email?: string
   pre_authorized_payments_token?: string
+  meal_voucher_max_amount_unit?: number
+  meal_voucher_max_quantity?: number
 } & (
+  | { amount: number; amount_unit?: never }
+  | { amount?: never; amount_unit: number }
+) & (
   | { flow: 'HOTP_AUTH' | 'PRE_AUTHORIZED' | 'PRE_AUTHORIZED_FUND_LOCK'; token: string }
   | { flow: 'REFUND'; parent_payment_uid: string }
   | { flow: 'MATCH_USER'; consumer_uid: string }
@@ -86,11 +120,21 @@ export type PaymentCreateBody = {
 
 /**
  * Payment update body
+ * 
+ * @property amount - Amount in euros (e.g., 10.50). Will be automatically converted to amount_unit.
+ * @property amount_unit - Amount in cents (e.g., 1050). Use either 'amount' or 'amount_unit', not both.
+ * @property meal_voucher_max_amount_unit - Maximum amount in cents that can be paid with meal vouchers
+ * @property meal_voucher_max_quantity - Maximum number of meal vouchers that can be used
  */
 export type PaymentUpdateBody = {
   action: PaymentAction
-  amount_unit?: number
-}
+  meal_voucher_max_amount_unit?: number
+  meal_voucher_max_quantity?: number
+} & (
+  | { amount?: number; amount_unit?: never }
+  | { amount?: never; amount_unit?: number }
+  | { amount?: never; amount_unit?: never }
+)
 
 /**
  * Pre-authorized payment token creation body
@@ -176,7 +220,7 @@ export type PreAuthorizedPaymentResponse = {
 export type PaymentQueryParams = {
   limit?: number
   starting_after?: string
-  starting_after_timestamp?: string
+  starting_after_timestamp?: string | Date
   consumer_uid?: string
   payment_type?: string
   status?: PaymentStatus
@@ -191,4 +235,77 @@ export type PaymentQueryParams = {
 export type DailyClosureQueryParams = {
   limit?: number
   starting_after?: string
+}
+
+/**
+ * Report creation body
+ */
+export type ReportCreateBody = {
+  type: ReportType
+  format?: ReportFormatType
+  from_date: string
+  to_date: string
+  columns?: string[]
+}
+
+/**
+ * Report response
+ */
+export type ReportResponse = {
+  id: string
+  type: ReportType
+  format: ReportFormatType
+  status: ReportStatus
+  from_date: string
+  to_date: string
+  download_url?: string
+  created_at: string
+  updated_at: string
+}
+
+/**
+ * Report list query parameters
+ */
+export type ReportListQueryParams = {
+  limit?: number
+  starting_after?: string
+}
+
+/**
+ * Session creation body
+ */
+export type SessionCreateBody = {
+  fund_lock_id: string
+}
+
+/**
+ * Session response
+ */
+export type SessionResponse = {
+  id: string
+  amount_unit: number
+  residual_amount_unit: number
+  currency: string
+  status: SessionStatus
+  type: string
+  consumer_uid?: string
+  available?: boolean
+  expiration_date?: string
+}
+
+/**
+ * Session update body
+ */
+export type SessionUpdateBody = {
+  status: SessionStatus
+}
+
+/**
+ * Session event creation body
+ */
+export type SessionEventCreateBody = {
+  type: SessionEventType
+  amount_unit?: number
+  description?: string
+  metadata?: Record<string, unknown>
 }
