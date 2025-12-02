@@ -7,7 +7,7 @@
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "bin": {
-        "satispay-keygen": "./dist/src/bin/satispay-keygen.js"
+        "satispay-keygen": "./dist/bin/satispay-keygen.js"
     },
     "exports": {
         ".": {
@@ -50,12 +50,12 @@
         "payment",
         "fetch"
     ],
-    "author": "Satispay",
+    "author": "Volver",
     "license": "MIT",
-    "homepage": "https://www.satispay.com",
+    "homepage": "https://www.npmjs.com/package/@volverjs/satispay-node-sdk",
     "repository": {
         "type": "git",
-        "url": "https://github.com/satispay/gbusiness-api-nodejs-sdk"
+        "url": "https://github.com/volverjs/satispay-node-sdk"
     },
     "engines": {
         "node": ">=18.0.0"

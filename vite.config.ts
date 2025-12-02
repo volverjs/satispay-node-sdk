@@ -13,9 +13,11 @@ export default defineConfig({
 	],
 	build: {
 		lib: {
-			entry: resolve(__dirname, 'src/index.ts'),
+			entry: {
+				index: resolve(__dirname, 'src/index.ts'),
+				'bin/satispay-keygen': resolve(__dirname, 'src/bin/satispay-keygen.ts'),
+			},
 			formats: ['es'],
-			fileName: 'index',
 		},
 		outDir: 'dist',
 		sourcemap: true,
