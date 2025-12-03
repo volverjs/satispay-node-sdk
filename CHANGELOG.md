@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.4] - 2025-12-03
+
+### Changed
+- **BREAKING:** `Session` API aligned with official Satispay documentation
+  - Changed `type` field to `operation` in session events
+  - Changed `SessionEventType` enum to `SessionEventOperation`
+  - Replaced `'ADD_ITEM' | 'REMOVE_ITEM' | 'UPDATE_TOTAL'` with `'ADD' | 'REMOVE'`
+  - Removed `UPDATE_TOTAL` operation (not supported by Satispay API)
+  - Made `currency` field mandatory in `SessionEventCreateBody`
+
+### Added
+- E2E tests for fund lock payment creation
+
+### Fixed
+- `Session` types and operations now match official Satispay API specification
+- Corrected Session examples in README and `examples/pos-session.ts`
+- Corrected Pre-Authorized Payment Tokens documentation in README
+- Removed duplicate "Create a Payment" section from README
+
 ## [0.0.3] - 2025-12-03
 
 ### Changed
@@ -66,6 +85,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example files for all major operations (payments, reports, sessions, webhooks, etc.)
 - Runtime-specific examples for Node.js, Deno, and Bun
 
-[0.0.3]: https://github.com/volverjs/zod-vue-i18n/compare/v0.0.2...v0.0.3
-[0.0.2]: https://github.com/volverjs/zod-vue-i18n/compare/v0.0.1...v0.0.2
+[0.0.4]: https://github.com/volverjs/satispay-node-sdk/compare/v0.0.3...v0.0.4
+[0.0.3]: https://github.com/volverjs/satispay-node-sdk/compare/v0.0.2...v0.0.3
+[0.0.2]: https://github.com/volverjs/satispay-node-sdk/compare/v0.0.1...v0.0.2
 [0.0.1]: https://github.com/volverjs/satispay-node-sdk/releases/tag/v0.0.1

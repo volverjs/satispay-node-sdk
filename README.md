@@ -12,7 +12,7 @@ Universal (but unofficial) TypeScript SDK for Satispay GBusiness API integration
 
 - **Zero dependencies** - Uses only native standard APIs (fetch, crypto)
 - **Multi-runtime** - Works with Node.js 18+, Deno 1.30+, and Bun 1.0+
-- **Lightweight** - Only 156KB bundle size
+- **Lightweight** - Only 268KB bundle size
 - **Type-safe** - Complete TypeScript definitions
 - **Modern** - Fetch API, async/await, ES Modules
 - **Secure** - Native RSA-SHA256 encryption
@@ -96,29 +96,6 @@ Store credentials in `.env`:
 SATISPAY_PUBLIC_KEY="-----BEGIN PUBLIC KEY-----\n..."
 SATISPAY_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n..."
 SATISPAY_KEY_ID="your-key-id"
-```
-
-### Create a Payment
-
-```typescript
-import { Payment } from '@volverjs/satispay-node-sdk';
-
-// Using amount in euros (recommended)
-const payment = await Payment.create({
-  flow: 'MATCH_CODE',
-  amount: 1.99, // Amount in euros (automatically converted to cents)
-  currency: 'EUR',
-});
-
-// Or using amount_unit in cents (still supported)
-const payment2 = await Payment.create({
-  flow: 'MATCH_CODE',
-  amount_unit: 199, // Amount in cents (1.99 EUR)
-  currency: 'EUR',
-});
-
-console.log('Payment ID:', payment.id);
-console.log('Code:', payment.code_identifier);
 ```
 
 ## API Reference
@@ -247,23 +224,43 @@ console.log('Refunds:', closure.shop_daily_closure.refund_amount_unit / 100);
 
 ### Pre-Authorized Payment Tokens
 
+Pre-Authorized Payment Tokens allow consumers to authorize payments in advance:
+
 ```typescript
 import { PreAuthorizedPaymentToken } from '@volverjs/satispay-node-sdk';
 
-// Create token
+// Create a pre-authorized payment token
 const token = await PreAuthorizedPaymentToken.create({
-  flow: 'MATCH_CODE',
-  consumer_uid: 'CONSUMER_UID',
+  reason: 'Subscription payment',
+  callback_url: 'https://your-site.com/callback',
+  redirect_url: 'https://your-site.com/success',
 });
 
-// Get token
+console.log('Token ID:', token.id);
+console.log('Token:', token.token);
+console.log('Status:', token.status); // PENDING
+
+// Get token details
 const retrievedToken = await PreAuthorizedPaymentToken.get(token.id);
 
-// Update token
+// Update token (e.g., cancel it)
 const updatedToken = await PreAuthorizedPaymentToken.update(token.id, {
   status: 'CANCELED',
 });
+
+// Once the consumer accepts the token, you can use it to create payments:
+const payment = await Payment.create({
+  flow: 'PRE_AUTHORIZED',
+  token: token.token,
+  amount: 9.99,
+  currency: 'EUR',
+});
 ```
+
+**Important Notes:**
+- The consumer must accept the token before it can be used for payments
+- Token status can be: `PENDING`, `ACCEPTED`, or `CANCELED`
+- Use the `token` field (not the `id`) when creating pre-authorized payments
 
 ### Reports
 
@@ -317,23 +314,19 @@ console.log('Available amount:', session.residual_amount_unit);
 
 // Add items to the session
 await Session.createEvent(session.id, {
-  type: 'ADD_ITEM',
+  operation: 'ADD',
   amount_unit: 500,
+  currency: 'EUR',
   description: 'Coffee',
   metadata: { sku: 'COFFEE-001' },
 });
 
-// Remove items
+// Remove items (e.g., discount)
 await Session.createEvent(session.id, {
-  type: 'REMOVE_ITEM',
+  operation: 'REMOVE',
   amount_unit: 200,
+  currency: 'EUR',
   description: 'Discount',
-});
-
-// Update total
-await Session.createEvent(session.id, {
-  type: 'UPDATE_TOTAL',
-  amount_unit: 300,
 });
 
 // Get session details
@@ -548,7 +541,7 @@ This project uses [Vitest](https://vitest.dev/) for testing. The test suite incl
 - **RSA Service tests** for cryptographic operations
 - **Mock-based tests** for API interactions
 
-Current test coverage: **79.45%**
+Current test coverage: **94.82%** (Statements: 93.83%, Branches: 89.65%, Functions: 100%, Lines: 95.8%)
 
 Run tests:
 ```bash
@@ -605,7 +598,7 @@ Benefits:
 ## Why Zero Dependencies?
 
 - No third-party vulnerability risks
-- Minimal bundle size (156KB)
+- Minimal bundle size (268KB)
 - Fast installation
 - No dependency conflicts
 - Uses only standard APIs
