@@ -193,13 +193,24 @@ export type Consumer = {
 }
 
 /**
- * Daily closure interface
+ * Daily closure detail
+ */
+export type DailyClosureDetail = {
+  id: string
+  type: string
+  customer_uid: string
+  gross_amount_unit: number
+  refund_amount_unit: number
+  amount_unit: number
+  currency: string
+}
+
+/**
+ * Daily closure response
  */
 export type DailyClosure = {
-  date: string
-  total_amount_unit: number
-  currency: string
-  payments_count: number
+  shop_daily_closure: DailyClosureDetail
+  device_daily_closure: DailyClosureDetail
 }
 
 /**

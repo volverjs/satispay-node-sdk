@@ -231,12 +231,18 @@ import { DailyClosure } from '@volverjs/satispay-node-sdk';
 // Today's closure
 const closure = await DailyClosure.get();
 
-// Specific date (YYYYMMDD format)
-const closureByDate = await DailyClosure.get('20240115');
+// Specific date using Date object (recommended)
+const yesterday = new Date();
+yesterday.setDate(yesterday.getDate() - 1);
+const closureByDate = await DailyClosure.get(yesterday);
 
-console.log('Date:', closure.date);
-console.log('Total:', closure.total_amount_unit / 100, closure.currency);
-console.log('Payments:', closure.payments_count);
+// Or using YYYYMMDD string format
+const closureByString = await DailyClosure.get('20240115');
+
+console.log('Date:', closure.shop_daily_closure.id);
+console.log('Total:', closure.shop_daily_closure.amount_unit / 100, closure.shop_daily_closure.currency);
+console.log('Gross:', closure.shop_daily_closure.gross_amount_unit / 100);
+console.log('Refunds:', closure.shop_daily_closure.refund_amount_unit / 100);
 ```
 
 ### Pre-Authorized Payment Tokens

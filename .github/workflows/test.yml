@@ -46,3 +46,10 @@ jobs:
                 files: ./coverage/coverage-final.json
                 flags: unittests
                 name: codecov-umbrella
+            
+            - name: Upload coverage artifact
+              uses: actions/upload-artifact@v4
+              with:
+                name: coverage
+                path: coverage/
+                retention-days: 1
