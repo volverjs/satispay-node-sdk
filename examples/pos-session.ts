@@ -67,46 +67,48 @@ async function main() {
 			console.log('Residual amount:', session.residual_amount_unit / 100, 'EUR')
 			console.log('Status:', session.status)
 
-			// Step 3: Add items to the session
-			console.log('\n3️⃣  Adding items to session...\n')
+		// Step 3: Add items to the session
+		console.log('\n3️⃣  Adding items to session...\n')
 
-			// Add coffee
-			await Session.createEvent(session.id, {
-				type: 'ADD_ITEM',
-				amount_unit: 300, // 3.00 EUR
-				description: 'Espresso',
-				metadata: { sku: 'COFFEE-001', category: 'beverages' },
-			})
-			console.log('✅ Added: Espresso (3.00 EUR)')
+		// Add coffee
+		await Session.createEvent(session.id, {
+			operation: 'ADD',
+			amount_unit: 300, // 3.00 EUR
+			currency: 'EUR',
+			description: 'Espresso',
+			metadata: { sku: 'COFFEE-001', category: 'beverages' },
+		})
+		console.log('✅ Added: Espresso (3.00 EUR)')
 
-			// Add croissant
-			await Session.createEvent(session.id, {
-				type: 'ADD_ITEM',
-				amount_unit: 250, // 2.50 EUR
-				description: 'Croissant',
-				metadata: { sku: 'PASTRY-042', category: 'food' },
-			})
-			console.log('✅ Added: Croissant (2.50 EUR)')
+		// Add croissant
+		await Session.createEvent(session.id, {
+			operation: 'ADD',
+			amount_unit: 250, // 2.50 EUR
+			currency: 'EUR',
+			description: 'Croissant',
+			metadata: { sku: 'PASTRY-042', category: 'food' },
+		})
+		console.log('✅ Added: Croissant (2.50 EUR)')
 
-			// Add water
-			await Session.createEvent(session.id, {
-				type: 'ADD_ITEM',
-				amount_unit: 150, // 1.50 EUR
-				description: 'Water',
-				metadata: { sku: 'DRINK-010', category: 'beverages' },
-			})
-			console.log('✅ Added: Water (1.50 EUR)')
+		// Add water
+		await Session.createEvent(session.id, {
+			operation: 'ADD',
+			amount_unit: 150, // 1.50 EUR
+			currency: 'EUR',
+			description: 'Water',
+			metadata: { sku: 'DRINK-010', category: 'beverages' },
+		})
+		console.log('✅ Added: Water (1.50 EUR)')
 
-			// Apply discount
-			console.log('\n4️⃣  Applying discount...\n')
-			await Session.createEvent(session.id, {
-				type: 'REMOVE_ITEM',
-				amount_unit: 100, // -1.00 EUR discount
-				description: 'Happy Hour Discount',
-			})
-			console.log('✅ Applied discount: -1.00 EUR')
-
-			// Check session status
+		// Apply discount
+		console.log('\n4️⃣  Applying discount...\n')
+		await Session.createEvent(session.id, {
+			operation: 'REMOVE',
+			amount_unit: 100, // -1.00 EUR discount
+			currency: 'EUR',
+			description: 'Happy Hour Discount',
+		})
+		console.log('✅ Applied discount: -1.00 EUR')			// Check session status
 			console.log('\n5️⃣  Checking session status...\n')
 			const sessionDetails = await Session.get(session.id)
 			console.log('Total amount:', sessionDetails.amount_unit / 100, 'EUR')

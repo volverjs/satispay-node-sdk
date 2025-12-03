@@ -174,94 +174,75 @@ describe('Session', () => {
 	})
 
 	describe('createEvent', () => {
-		it('should add an item to the session', async () => {
-			const sessionId = 'session-123'
-			const eventBody: SessionEventCreateBody = {
-				type: 'ADD_ITEM',
-				amount_unit: 1000,
-				description: 'Coffee',
-			}
-			const updatedSession: SessionResponse = {
-				...mockSessionResponse,
-				residual_amount_unit: 4000,
-			}
+	it('should add an item to the session', async () => {
+		const sessionId = 'session-123'
+		const eventBody: SessionEventCreateBody = {
+			operation: 'ADD',
+			amount_unit: 1000,
+			currency: 'EUR',
+			description: 'Coffee',
+		}
+		const updatedSession: SessionResponse = {
+			...mockSessionResponse,
+			residual_amount_unit: 4000,
+		}
 
-			vi.mocked(Request.post).mockResolvedValue(updatedSession)
+		vi.mocked(Request.post).mockResolvedValue(updatedSession)
 
-			const result = await Session.createEvent(sessionId, eventBody)
+		const result = await Session.createEvent(sessionId, eventBody)
 
-			expect(Request.post).toHaveBeenCalledWith(
-				'/g_business/v1/sessions/session-123/events',
-				{
-					headers: {},
-					body: eventBody,
-					sign: true,
-				},
-			)
-			expect(result.residual_amount_unit).toBe(4000)
-		})
+		expect(Request.post).toHaveBeenCalledWith(
+			'/g_business/v1/sessions/session-123/events',
+			{
+				headers: {},
+				body: eventBody,
+				sign: true,
+			},
+		)
+		expect(result.residual_amount_unit).toBe(4000)
+	})
 
-		it('should remove an item from the session', async () => {
-			const sessionId = 'session-123'
-			const eventBody: SessionEventCreateBody = {
-				type: 'REMOVE_ITEM',
-				amount_unit: 500,
-				description: 'Discount applied',
-			}
+	it('should remove an item from the session', async () => {
+		const sessionId = 'session-123'
+		const eventBody: SessionEventCreateBody = {
+			operation: 'REMOVE',
+			amount_unit: 500,
+			currency: 'EUR',
+			description: 'Discount applied',
+		}
 
-			vi.mocked(Request.post).mockResolvedValue(mockSessionResponse)
+		vi.mocked(Request.post).mockResolvedValue(mockSessionResponse)
 
-			await Session.createEvent(sessionId, eventBody)
+		await Session.createEvent(sessionId, eventBody)
 
-			expect(Request.post).toHaveBeenCalledWith(
-				'/g_business/v1/sessions/session-123/events',
-				{
-					headers: {},
-					body: eventBody,
-					sign: true,
-				},
-			)
-		})
+		expect(Request.post).toHaveBeenCalledWith(
+			'/g_business/v1/sessions/session-123/events',
+			{
+				headers: {},
+				body: eventBody,
+				sign: true,
+			},
+		)
+	})
 
-		it('should update the total', async () => {
-			const sessionId = 'session-123'
-			const eventBody: SessionEventCreateBody = {
-				type: 'UPDATE_TOTAL',
-				amount_unit: 3500,
-				description: 'Total updated',
-			}
+	it('should create event with metadata', async () => {
+		const sessionId = 'session-123'
+		const eventBody: SessionEventCreateBody = {
+			operation: 'ADD',
+			amount_unit: 1200,
+			currency: 'EUR',
+			description: 'Espresso',
+			metadata: {
+				sku: 'COFFEE-001',
+			category: 'beverages',
+		},
+	}
 
-			vi.mocked(Request.post).mockResolvedValue(mockSessionResponse)
+	vi.mocked(Request.post).mockResolvedValue(mockSessionResponse)
 
-			await Session.createEvent(sessionId, eventBody)
+	await Session.createEvent(sessionId, eventBody)
 
-			expect(Request.post).toHaveBeenCalledWith(
-				'/g_business/v1/sessions/session-123/events',
-				{
-					headers: {},
-					body: eventBody,
-					sign: true,
-				},
-			)
-		})
-
-		it('should create event with metadata', async () => {
-			const sessionId = 'session-123'
-			const eventBody: SessionEventCreateBody = {
-				type: 'ADD_ITEM',
-				amount_unit: 1200,
-				description: 'Espresso',
-				metadata: {
-					sku: 'COFFEE-001',
-					category: 'beverages',
-				},
-			}
-
-			vi.mocked(Request.post).mockResolvedValue(mockSessionResponse)
-
-			await Session.createEvent(sessionId, eventBody)
-
-			expect(Request.post).toHaveBeenCalledWith(
+	expect(Request.post).toHaveBeenCalledWith(
 				'/g_business/v1/sessions/session-123/events',
 				expect.objectContaining({
 					body: expect.objectContaining({
@@ -277,8 +258,9 @@ describe('Session', () => {
 		it('should create event with custom headers', async () => {
 			const sessionId = 'session-123'
 			const eventBody: SessionEventCreateBody = {
-				type: 'ADD_ITEM',
+				operation: 'ADD',
 				amount_unit: 800,
+				currency: 'EUR',
 			}
 			const customHeaders = {
 				'Idempotency-Key': 'event-unique-123',
