@@ -12,10 +12,24 @@ vi.mock('../src/Request', () => ({
 
 describe('DailyClosure', () => {
 	const mockDailyClosure: DailyClosureType = {
-		date: '2025-11-18',
-		total_amount_unit: 15000,
-		currency: 'EUR',
-		payments_count: 25,
+		shop_daily_closure: {
+			id: '20251118',
+			type: 'SHOP_ONLINE',
+			customer_uid: '2c544020-2cfb-45ea-b22e-1a0302c54b11',
+			gross_amount_unit: 15000,
+			refund_amount_unit: 0,
+			amount_unit: 15000,
+			currency: 'EUR',
+		},
+		device_daily_closure: {
+			id: '20251118',
+			type: 'DEVICE',
+			customer_uid: '8c061458-e634-440c-8770-86b36eb9d1d6',
+			gross_amount_unit: 0,
+			refund_amount_unit: 0,
+			amount_unit: 0,
+			currency: 'EUR',
+		},
 	}
 
 	beforeEach(() => {
@@ -62,6 +76,30 @@ describe('DailyClosure', () => {
 
 			const callArg = vi.mocked(Request.get).mock.calls[0][0]
 			expect(callArg).toMatch(/^\/g_business\/v1\/daily_closure\/\d{8}/)
+		})
+
+		it('should accept Date object', async () => {
+			const date = new Date('2025-11-18')
+			vi.mocked(Request.get).mockResolvedValue(mockDailyClosure)
+
+			await DailyClosure.get(date)
+
+			expect(Request.get).toHaveBeenCalledWith('/g_business/v1/daily_closure/20251118', {
+				headers: {},
+				sign: true,
+			})
+		})
+
+		it('should accept string date in YYYYMMDD format', async () => {
+			const dateString = '20251118'
+			vi.mocked(Request.get).mockResolvedValue(mockDailyClosure)
+
+			await DailyClosure.get(dateString)
+
+			expect(Request.get).toHaveBeenCalledWith('/g_business/v1/daily_closure/20251118', {
+				headers: {},
+				sign: true,
+			})
 		})
 	})
 })
