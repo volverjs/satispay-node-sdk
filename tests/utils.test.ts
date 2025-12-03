@@ -81,6 +81,22 @@ describe('DateUtils', () => {
 		})
 	})
 
+	describe('formatToYYYYMMDD', () => {
+		it('should format Date object to YYYYMMDD', () => {
+			const date = new Date('2024-01-15T10:30:00Z')
+			expect(DateUtils.formatToYYYYMMDD(date)).toBe('20240115')
+		})
+
+		it('should format ISO string to YYYYMMDD', () => {
+			expect(DateUtils.formatToYYYYMMDD('2024-01-15T10:30:00Z')).toBe('20240115')
+		})
+
+		it('should pad single digit months and days', () => {
+			const date = new Date('2024-03-05T10:30:00Z')
+			expect(DateUtils.formatToYYYYMMDD(date)).toBe('20240305')
+		})
+	})
+
 	describe('parseFromApi', () => {
 		it('should parse date string', () => {
 			const date = DateUtils.parseFromApi('2024-01-15T10:30:00Z')
