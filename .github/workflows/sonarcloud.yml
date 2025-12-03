@@ -14,6 +14,16 @@ jobs:
                   SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
               with:
                   fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
+            
+            - name: Download coverage artifact
+              if: env.SONAR_TOKEN
+              uses: actions/download-artifact@v4
+              env:
+                  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+              with:
+                  name: coverage
+                  path: coverage/
+            
             - name: SonarCloud Scan
               if: env.SONAR_TOKEN
               uses: SonarSource/sonarcloud-github-action@master
