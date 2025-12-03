@@ -25,8 +25,9 @@ import type {
  * 
  * // Add items to the session
  * await Session.createEvent(session.id, {
- *   type: 'ADD_ITEM',
+ *   operation: 'ADD',
  *   amount_unit: 500,
+ *   currency: 'EUR',
  *   description: 'Product A'
  * });
  * 
@@ -140,16 +141,18 @@ export class Session {
 	 * ```typescript
 	 * // Add an item to the session
 	 * await Session.createEvent('session-123', {
-	 *   type: 'ADD_ITEM',
+	 *   operation: 'ADD',
 	 *   amount_unit: 1000,
+	 *   currency: 'EUR',
 	 *   description: 'Coffee',
 	 *   metadata: { sku: 'COFFEE-001' }
 	 * });
 	 * 
 	 * // Remove an item
 	 * await Session.createEvent('session-123', {
-	 *   type: 'REMOVE_ITEM',
+	 *   operation: 'REMOVE',
 	 *   amount_unit: 500,
+	 *   currency: 'EUR',
 	 *   description: 'Discount applied'
 	 * });
 	 * ```

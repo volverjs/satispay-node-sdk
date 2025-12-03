@@ -63,9 +63,9 @@ export type ReportStatus = 'PENDING' | 'READY' | 'FAILED'
 export type SessionStatus = 'OPEN' | 'CLOSE'
 
 /**
- * Session event type
+ * Session event operation
  */
-export type SessionEventType = 'ADD_ITEM' | 'REMOVE_ITEM' | 'UPDATE_TOTAL'
+export type SessionEventOperation = 'ADD' | 'REMOVE'
 
 /**
  * Payment action
@@ -315,8 +315,9 @@ export type SessionUpdateBody = {
  * Session event creation body
  */
 export type SessionEventCreateBody = {
-  type: SessionEventType
-  amount_unit?: number
+  operation: SessionEventOperation
+  amount_unit: number
+  currency: string
   description?: string
   metadata?: Record<string, unknown>
 }
